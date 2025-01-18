@@ -26,22 +26,16 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({ origin: FrontendURL, credentials: true }));
-app.use(express.json());
 
-// Serve uploaded files (if any)
-app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(express.json()); // Parse incoming JSON requests
+app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
 
 // Serve React build files
-if (process.env.NODE_ENV === 'production') {
-  app.get('/', (req, res) => {
-    res.send("Backend is running...");
-  });
-}
- else {
+
   app.get('/', (req, res) => {
     res.send('Hello World!');
   });
-}
+
 
 // Routes
 app.use('/api/sarees', require("./routes/sarees"));
