@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-poppins;
+}
+
+@font-face {
+  font-family: 'Comic Sans MS';
+  src: url('/fonts/Comic Sans MS.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+#root{
+  overflow-x: hidden;
+}
