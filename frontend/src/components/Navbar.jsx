@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import logo from "../assets/Logo.png"; // Replace with your PNG logo path.
+import logo from "../assets/Logo.jpg"; // Replace with your PNG logo path.
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -70,7 +70,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 sm:px-0 lg:px-20 py-4 flex items-center justify-between h-[80px]">
         {/* Logo */}
         <div>
-          <img src={logo} alt="Logo" className="h-10 w-auto" />
+          <img src={logo} alt="Logo" className="w-[220px] h-[100px]" />
         </div>
 
         {/* Desktop Nav Items */}
