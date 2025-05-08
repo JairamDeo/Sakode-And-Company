@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Reviews from "./Screens/Reviews";
 
 // Lazy load pages
 const Home = lazy(() => import("./Screens/Home"));
@@ -44,6 +45,9 @@ function App() {
               </section>
               <section id="aboutus">
                 <Aboutus />
+              </section>
+              <section id="reviews">
+                <Reviews />
               </section>
               <section id="contactus">
                 <Contactus />

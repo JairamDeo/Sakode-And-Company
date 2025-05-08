@@ -1,0 +1,22 @@
+.marquee-container {
+    display: flex;
+    animation: marquee 10s linear infinite;
+  }
+
+  .marquee-container .grid {
+    display: flex;
+  }
+
+  .marquee-container .grid .p-4 {
+    flex-shrink: 0;
+    margin-right: 20px;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
