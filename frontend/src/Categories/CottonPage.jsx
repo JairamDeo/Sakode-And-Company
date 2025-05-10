@@ -12,7 +12,7 @@ const CottonPage = () => {
                 const response = await axios.get(`${backendUrl}/api/sarees/category/Cotton`);
                 setCottonSarees([...response.data].reverse());
             } catch (error) {
-                setError('Error fetching cotton sarees');
+                setError('No Saree Uploaded!');
                 console.error(error);
             }
         };

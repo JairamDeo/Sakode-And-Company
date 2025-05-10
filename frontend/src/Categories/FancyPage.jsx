@@ -12,7 +12,7 @@ const FancyPage = () => {
                 const response = await axios.get(`${backendUrl}/api/sarees/category/Fancy`);
                 setFancySarees([...response.data].reverse());
             } catch (error) {
-                setError('Error fetching fancy sarees');
+                setError('No Saree Uploaded!');
                 console.error(error);
             }
         };

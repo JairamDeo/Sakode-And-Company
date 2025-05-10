@@ -12,7 +12,7 @@ const SyntheticPage = () => {
                 const response = await axios.get(`${backendUrl}/api/sarees/category/Synthetic`);
                 setSyntheticSarees([...response.data].reverse());
             } catch (error) {
-                setError('Error fetching synthetic sarees');
+                setError('No Saree Uploaded!');
                 console.error(error);
             }
         };

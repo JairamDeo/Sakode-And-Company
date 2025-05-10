@@ -12,7 +12,7 @@ const ShaluPage = () => {
                 const response = await axios.get(`${backendUrl}/api/sarees/category/Shalu`);
                 setShaluSarees([...response.data].reverse());
             } catch (error) {
-                setError('Error fetching shalu sarees');
+                setError('No Saree Uploaded!');
                 console.error(error);
             }
         };

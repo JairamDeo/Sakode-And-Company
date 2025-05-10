@@ -12,7 +12,7 @@ const ZariPage = () => {
                 const response = await axios.get(`${backendUrl}/api/sarees/category/Zari`);
                 setZariSarees([...response.data].reverse());
             } catch (error) {
-                setError('Error fetching zari sarees');
+                setError('No Saree Uploaded!');
                 console.error(error);
             }
         };
