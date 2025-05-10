@@ -70,7 +70,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 sm:px-0 lg:px-20 py-4 flex items-center justify-between h-[80px]">
         {/* Logo */}
         <div>
-          <img src={logo} alt="Logo" className="w-[220px] h-[100px]" />
+          <img src={logo} alt="Logo" className="w-[220px] h-[70px] object-fit" />
         </div>
 
         {/* Desktop Nav Items */}
