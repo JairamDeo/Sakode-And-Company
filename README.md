@@ -1,4 +1,4 @@
-# 🍽️ Sakode & Company MongoDB Setup Guide (Windows)
+# 🚀 Sakode & Company MongoDB Atlas Setup Guide (Windows)
 
 This guide will walk you through setting up MongoDB for the MealMate project on **Windows**.
 

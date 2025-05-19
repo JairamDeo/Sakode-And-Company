@@ -1,4 +1,4 @@
-# 🚀 Food Order Backend (Node.js + Express)
+# 🚀 Sakode & Company Backend (Node.js + Express)
 
 This is the backend server of the Sakode & Company built using **Node.js**, **Express.js**, **Cloudinary** and **MongoDB**. It provides REST APIs for sarees data retrieval, and sarees uploading using admin panel.
 
