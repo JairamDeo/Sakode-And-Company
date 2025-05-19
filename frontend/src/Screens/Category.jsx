@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import synthetic from "../assets/syntheticm.jpg";
-import zari from "../assets/zarim.jpg";
-import cotton from "../assets/cottonm.jpg";
-import shalu from "../assets/shalum.jpg";
-import topdyied from "../assets/topdyiedm.jpg";
+import synthetic from "../assets/syntheticm.webp";
+import zari from "../assets/zarim.webp";
+import cotton from "../assets/cottonm.webp";
+import shalu from "../assets/shalum.webp";
+import topdyied from "../assets/topdyiedm.webp";
 
 export default function Category() {
   const cards = [

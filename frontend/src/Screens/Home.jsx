@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import banner1 from "../assets/zareebanner.jpg";
-import banner4 from "../assets/syntheticbanner.jpg";
-import banner2 from "../assets/cottonbanner.jpg";
-import banner3 from "../assets/shalubanner.jpg";
-import banner5 from "../assets/fancybanner.jpg";
+import banner1 from "../assets/zareebanner.webp";
+import banner4 from "../assets/syntheticbanner.webp";
+import banner2 from "../assets/cottonbanner.webp";
+import banner3 from "../assets/shalubanner.webp";
+import banner5 from "../assets/fancybanner.webp";
 
 const Home = () => {
   const banners = [banner1, banner2, banner3, banner4, banner5];

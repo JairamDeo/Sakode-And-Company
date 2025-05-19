@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import logo from "../assets/Logo.jpg"; // Replace with your PNG logo path.
+import logo from "../assets/Logo.webp"; // Replace with your PNG logo path.
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
