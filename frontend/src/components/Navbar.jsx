@@ -1,10 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link as ScrollLink } from "react-scroll";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import logo from "../assets/Logo.webp"; // Replace with your PNG logo path.
+import logo from "../assets/Logo.webp";
+
+// Debounce function to improve scroll performance
+const debounce = (func, wait = 20) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,69 +22,59 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Initialize AOS
   useEffect(() => {
-    AOS.init({ duration: 1000 }); // Initialize AOS with default duration
-    AOS.refresh(); // Refresh AOS on initial load
+    AOS.init({ duration: 1000 });
   }, []);
 
-  // Update active link when the page scrolls or navigates
-  useEffect(() => {
-    const handleScroll = () => {
+  // Debounced scroll handler
+  const handleScroll = useCallback(
+    debounce(() => {
       const sections = ["home", "category", "aboutus", "contactus"];
-      sections.forEach((section) => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
+      for (let section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const rect = el.getBoundingClientRect();
           if (rect.top <= 100 && rect.bottom >= 100) {
             setActiveLink(section);
+            break;
           }
         }
-      });
-    };
+      }
+    }, 50),
+    []
+  );
 
+  useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Initialize on component mount
+    handleScroll(); // Initialize on load
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const closeMenu = () => setIsMenuOpen(false);
 
   const handleNavClick = (target) => {
     if (location.pathname !== "/") {
-      // Redirect to the homepage if not on it
       navigate("/");
       setTimeout(() => {
-        const element = document.getElementById(target);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
+        const el = document.getElementById(target);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } else {
       setActiveLink(target);
     }
   };
 
+  const navItems = ["home", "category", "aboutus", "contactus"];
+
   return (
     <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
       <div className="container mx-auto px-6 sm:px-0 lg:px-20 py-4 flex items-center justify-between h-[80px]">
-        {/* Logo */}
-        <div>
-          <img src={logo} alt="Logo" className="w-[220px] h-[70px] object-fit" />
-        </div>
+        <img src={logo} alt="Logo" className="w-[220px] h-[70px] object-fit" />
 
-        {/* Desktop Nav Items */}
+        {/* Desktop Nav */}
         <div className="hidden md:flex space-x-8 uppercase">
-          {["home", "category", "aboutus", "contactus"].map((item) => (
+          {navItems.map((item) => (
             <ScrollLink
               key={item}
               to={item}
@@ -104,7 +103,7 @@ const Navbar = () => {
           <FaSearch className="text-black" />
         </div>
 
-        {/* Mobile Menu Icon */}
+        {/* Mobile Toggle */}
         <div className="md:hidden">
           <button onClick={toggleMenu}>
             {isMenuOpen ? (
@@ -122,7 +121,7 @@ const Navbar = () => {
           className="absolute top-[80px] left-0 w-full bg-white flex flex-col py-4 px-6 shadow-lg z-40"
           onClick={closeMenu}
         >
-          {["home", "category", "aboutus", "contactus"].map((item) => (
+          {navItems.map((item) => (
             <ScrollLink
               key={item}
               to={item}
@@ -145,4 +144,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar);

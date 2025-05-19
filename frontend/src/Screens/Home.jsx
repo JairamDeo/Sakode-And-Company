@@ -1,70 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import banner1 from "../assets/zareebanner.webp";
-import banner4 from "../assets/syntheticbanner.webp";
 import banner2 from "../assets/cottonbanner.webp";
 import banner3 from "../assets/shalubanner.webp";
+import banner4 from "../assets/syntheticbanner.webp";
 import banner5 from "../assets/fancybanner.webp";
 
 const Home = () => {
   const banners = [banner1, banner2, banner3, banner4, banner5];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const slideInterval = 4000; // Auto-slide interval in milliseconds
+  const slideInterval = 4000;
+  const intervalRef = useRef(null);
 
-  let touchStartX = 0; // Start position of touch
-  let touchEndX = 0; // End position of touch
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? banners.length - 1 : prevIndex - 1));
-  };
+  }, [banners.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex === banners.length - 1 ? 0 : prevIndex + 1));
-  };
+  }, [banners.length]);
 
-  // Auto-Slide Functionality
+  // Auto-slide
   useEffect(() => {
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       handleNext();
     }, slideInterval);
 
-    return () => clearInterval(interval);
-  }, [currentIndex]);
+    return () => clearInterval(intervalRef.current);
+  }, [handleNext]);
 
-  // Keyboard Navigation
+  // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "ArrowLeft") {
-        handlePrev();
-      } else if (event.key === "ArrowRight") {
-        handleNext();
-      }
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "ArrowRight") handleNext();
     };
-
     window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handlePrev, handleNext]);
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  // Touch Gesture Functionality
-  const handleTouchStart = (event) => {
-    touchStartX = event.touches[0].clientX;
+  // Touch gestures
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
   };
 
-  const handleTouchEnd = (event) => {
-    touchEndX = event.changedTouches[0].clientX;
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].clientX;
     handleSwipe();
   };
 
   const handleSwipe = () => {
-    if (touchStartX - touchEndX > 50) {
-      // Swipe left
-      handleNext();
-    } else if (touchEndX - touchStartX > 50) {
-      // Swipe right
-      handlePrev();
-    }
+    const diff = touchStartX.current - touchEndX.current;
+    if (diff > 50) handleNext();
+    else if (diff < -50) handlePrev();
   };
 
   return (
@@ -86,13 +76,14 @@ const Home = () => {
             <img
               src={banner}
               alt={`Slide ${index + 1}`}
-              className="w-full h-full bg-cover"
+              className="w-full h-full object-fit"
+              loading="lazy"
             />
           </div>
         ))}
       </div>
 
-      {/* Controls (hidden on mobile) */}
+      {/* Navigation Controls */}
       <button
         onClick={handlePrev}
         className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-gray-600 focus:outline-none lg:p-3 hidden lg:block"
@@ -114,10 +105,11 @@ const Home = () => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full ${
+            className={`w-3 h-3 rounded-full transition-colors duration-300 ${
               index === currentIndex ? "bg-white" : "bg-gray-500"
             }`}
-          ></button>
+            aria-label={`Go to slide ${index + 1}`}
+          />
         ))}
       </div>
     </section>
