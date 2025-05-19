@@ -24,7 +24,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
             description: req.body.description,
             imageUrl: result.secure_url, // URL of the uploaded image
             category: req.body.category,
-            uploadDate: new Date().toLocaleString(),
+            uploadDate: new Date(),
+
         });
 
         // Save saree to database
@@ -36,22 +37,29 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     }
 });
 
-
-// Route to fetch sarees by category
+// Route to fetch sarees by category with optional limit and pagination
 router.get('/category/:category', async (req, res) => {
-  try {
-      const category = req.params.category;
-      const sarees = await Saree.find({ category });
+    try {
+        const category = req.params.category;
+        const limit = parseInt(req.query.limit) || 20;  // default to 20 items
+        const page = parseInt(req.query.page) || 1;      // default to page 1
+        const skip = (page - 1) * limit;
 
-      if (!sarees || sarees.length === 0) {
-          return res.status(404).json({ message: `No sarees found for category: ${category}` });
-      }
+        const sarees = await Saree.find({ category })
+            .sort({ uploadDate: -1 }) // newest first
+            .skip(skip)
+            .limit(limit);
 
-      res.status(200).json(sarees);
-  } catch (error) {
-      console.error('Error fetching sarees:', error);
-      res.status(500).json({ message: 'Error fetching sarees', error });
-  }
+        if (!sarees || sarees.length === 0) {
+            return res.status(404).json({ message: `No sarees found for category: ${category}` });
+        }
+
+        res.status(200).json(sarees);
+    } catch (error) {
+        console.error('Error fetching sarees:', error);
+        res.status(500).json({ message: 'Error fetching sarees', error });
+    }
 });
+
 
 module.exports = router;
