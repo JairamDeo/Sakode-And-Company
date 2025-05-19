@@ -21,7 +21,7 @@ const Aboutus = () => {
         data-aos="fade-up"
         data-aos-duration="1600"
       >
-        We, <span className="font-semibold">Sakode & Company</span>, a <span className="font-semibold">Wholesale Shop</span> situated at <span className="font-semibold text-orange-600">Gandhibagh</span>, <span className="font-semibold">Nagpur, Maharashtra</span>, are your one stop shop for all types and patterns of sarees. Our sarees are available in many different ranges and varieties. We have a qualified team of adroit professionals, who test the entire range of offered sarees to make sure that the clients receive flawless supplies. The demand for our sarees is increasing rapidly owing to their beautiful designs, finest quality and attractive colours.
+        We, <span className="font-semibold">Sakode & Company</span>, a <span className="font-semibold">Wholesale Shop</span> situated at <span className="font-semibold">Gandhibagh</span>, <span className="font-semibold">Nagpur, Maharashtra</span>, are your one stop shop for all types and patterns of sarees. Our sarees are available in many different ranges and varieties. We have a qualified team of adroit professionals, who test the entire range of offered sarees to make sure that the clients receive flawless supplies. The demand for our sarees is increasing rapidly owing to their beautiful designs, finest quality and attractive colours.
       </p>
     </section>
   );
