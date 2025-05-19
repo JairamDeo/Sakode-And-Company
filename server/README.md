@@ -55,6 +55,16 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 
 Replace `your_64_byte_hex_string_here` with the generated key in backend env file.
 
+📷 Cloudinary Setup for Image Uploads
+To enable image uploads using Cloudinary in this project, follow the steps below to configure your Cloudinary credentials:
+
+🔧 Step 1: Create a Cloudinary Account
+Go to https://cloudinary.com/
+
+Sign up or log in.
+
+After logging in, navigate to the Dashboard to find your Cloud Name, API Key, and API Secret.
+
 ---
 
 ```bash
@@ -70,11 +80,12 @@ FRONTEND_URL=http://localhost:5173
 MONGO_URI=your_mongodb_connection_string_here
 PORT=5000
 MONGO_URI=your_mongodb_connection_string_here
-CLOUDINARY_URL=cloudinary://662637925185345:jqZqb_Y2Bwh-m9giXJ4453dzPZo@dhqexh18e
-CLOUDINARY_CLOUD_NAME=dhqexh18e
-CLOUDINARY_API_KEY=662637925185345
-CLOUDINARY_API_SECRET=jqZqb_Y2Bwh-m9giXJ4453dzPZo
 JWT_SECRET=your_64_byte_hex_string_here
+CLOUDINARY_URL=cloudinary://<API_KEY>:<API_SECRET>@<CLOUD_NAME>
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
 ```
 
 ## 🚀 Running the Server
