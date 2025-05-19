@@ -1,3 +1,4 @@
+// routes/sarees.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -8,24 +9,38 @@ const Saree = require('../models/Saree');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Route to handle uploading saree details
-router.post('/upload', upload.single('image'), async (req, res) => {
+// Route to handle uploading saree details with multiple images
+router.post('/upload', upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'thumbnailImages', maxCount: 5 }
+]), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded.' });
+        if (!req.files || !req.files.image) {
+            return res.status(400).json({ message: 'Main image is required.' });
         }
 
-        // Upload image to Cloudinary
-        const result = await uploadImageToCloudinary(req.file);
+        // Upload main image to Cloudinary
+        const mainImageResult = await uploadImageToCloudinary(req.files.image[0]);
+        
+        // Upload thumbnail images (if any)
+        let thumbnailUrls = [];
+        if (req.files.thumbnailImages && req.files.thumbnailImages.length > 0) {
+            const thumbnailPromises = req.files.thumbnailImages.map(file => 
+                uploadImageToCloudinary(file)
+            );
+            
+            const thumbnailResults = await Promise.all(thumbnailPromises);
+            thumbnailUrls = thumbnailResults.map(result => result.secure_url);
+        }
 
         // Create a new saree document
         const newSaree = new Saree({
             name: req.body.name,
             description: req.body.description,
-            imageUrl: result.secure_url, // URL of the uploaded image
+            imageUrl: mainImageResult.secure_url, // URL of the main uploaded image
+            thumbnailImages: thumbnailUrls,
             category: req.body.category,
             uploadDate: new Date(),
-
         });
 
         // Save saree to database
@@ -60,6 +75,5 @@ router.get('/category/:category', async (req, res) => {
         res.status(500).json({ message: 'Error fetching sarees', error });
     }
 });
-
 
 module.exports = router;

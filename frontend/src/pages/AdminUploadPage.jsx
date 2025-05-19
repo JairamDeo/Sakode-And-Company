@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import successGif from '../assets/success.gif';
 
 const AdminUploadPage = () => {
-  const [image, setImage] = useState(null);
-  const [convertedImage, setConvertedImage] = useState(null);
-  const [webpPreviewUrl, setWebpPreviewUrl] = useState(null); // ✅ WebP preview
+  const [mainImage, setMainImage] = useState(null);
+  const [thumbnailImages, setThumbnailImages] = useState([]);
+  const [convertedMainImage, setConvertedMainImage] = useState(null);
+  const [convertedThumbnailImages, setConvertedThumbnailImages] = useState([]);
+  const [mainWebpPreviewUrl, setMainWebpPreviewUrl] = useState(null);
+  const [thumbnailWebpPreviewUrls, setThumbnailWebpPreviewUrls] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -13,11 +16,12 @@ const AdminUploadPage = () => {
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false); // ✅ Drag-and-drop highlight
+  const [isDraggingMain, setIsDraggingMain] = useState(false);
+  const [isDraggingThumbnails, setIsDraggingThumbnails] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // ✅ Convert image to WebP with quality control
+  // Convert image to WebP with quality control
   const convertToWebP = (file) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -43,7 +47,7 @@ const AdminUploadPage = () => {
             }
           },
           'image/webp',
-          0.8 // ✅ Quality setting: 0.0 (lowest) to 1.0 (best)
+          0.8 // Quality setting: 0.0 (lowest) to 1.0 (best)
         );
       };
 
@@ -54,57 +58,126 @@ const AdminUploadPage = () => {
     });
   };
 
-  const processFile = async (file) => {
+  // Process main image file
+  const processMainFile = async (file) => {
     if (!file) return;
-    setImage(file);
+    setMainImage(file);
     try {
       const webpBlob = await convertToWebP(file);
       const webpFile = new File([webpBlob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
         type: 'image/webp',
       });
-      setConvertedImage(webpFile);
-      setWebpPreviewUrl(URL.createObjectURL(webpBlob)); // ✅ Show WebP preview
+      setConvertedMainImage(webpFile);
+      setMainWebpPreviewUrl(URL.createObjectURL(webpBlob));
     } catch (error) {
-      console.error('Error converting image to WebP:', error);
-      setMessage('Error converting image. Please try another file.');
+      console.error('Error converting main image to WebP:', error);
+      setMessage('Error converting main image. Please try another file.');
     }
   };
 
-  const handleFileChange = (e) => {
-    processFile(e.target.files[0]);
+  // Process thumbnail image files
+  const processThumbnailFiles = async (files) => {
+    if (!files || files.length === 0) return;
+    
+    setThumbnailImages([...thumbnailImages, ...files]);
+    
+    try {
+      const webpPromises = Array.from(files).map(async (file) => {
+        const webpBlob = await convertToWebP(file);
+        const webpFile = new File([webpBlob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
+          type: 'image/webp',
+        });
+        const previewUrl = URL.createObjectURL(webpBlob);
+        return { file: webpFile, preview: previewUrl };
+      });
+      
+      const results = await Promise.all(webpPromises);
+      
+      setConvertedThumbnailImages([...convertedThumbnailImages, ...results.map(r => r.file)]);
+      setThumbnailWebpPreviewUrls([...thumbnailWebpPreviewUrls, ...results.map(r => r.preview)]);
+    } catch (error) {
+      console.error('Error converting thumbnail images to WebP:', error);
+      setMessage('Error converting thumbnail images. Please try other files.');
+    }
   };
 
-  const handleDrop = (e) => {
+  // Handle main image file change
+  const handleMainFileChange = (e) => {
+    processMainFile(e.target.files[0]);
+  };
+
+  // Handle thumbnail images file change
+  const handleThumbnailFilesChange = (e) => {
+    processThumbnailFiles(e.target.files);
+  };
+
+  // Handle main image drag and drop
+  const handleMainDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
+    setIsDraggingMain(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
+      processMainFile(e.dataTransfer.files[0]);
     }
   };
 
-  const handleDragOver = (e) => {
+  // Handle thumbnail images drag and drop
+  const handleThumbnailsDrop = (e) => {
     e.preventDefault();
-    setIsDragging(true);
+    e.stopPropagation();
+    setIsDraggingThumbnails(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processThumbnailFiles(e.dataTransfer.files);
+    }
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
+  // Handle drag events
+  const handleDragOver = (e, setter) => {
+    e.preventDefault();
+    setter(true);
   };
 
+  const handleDragLeave = (setter) => {
+    setter(false);
+  };
+
+  // Remove a thumbnail
+  const handleRemoveThumbnail = (index) => {
+    const newThumbnails = [...thumbnailImages];
+    const newConvertedThumbnails = [...convertedThumbnailImages];
+    const newPreviews = [...thumbnailWebpPreviewUrls];
+    
+    // Revoke object URL to prevent memory leaks
+    URL.revokeObjectURL(newPreviews[index]);
+    
+    newThumbnails.splice(index, 1);
+    newConvertedThumbnails.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setThumbnailImages(newThumbnails);
+    setConvertedThumbnailImages(newConvertedThumbnails);
+    setThumbnailWebpPreviewUrls(newPreviews);
+  };
+
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!convertedImage || !name || !description || !category) {
-      setMessage('Please fill out all fields');
+    if (!convertedMainImage || !name || !description || !category) {
+      setMessage('Please fill out all required fields and upload a main image');
       return;
     }
 
     const formData = new FormData();
-    formData.append('image', convertedImage);
+    formData.append('image', convertedMainImage);
     formData.append('name', name);
     formData.append('description', description);
     formData.append('category', category);
     formData.append('dateTime', new Date().toLocaleString());
+
+    // Append all thumbnail images
+    convertedThumbnailImages.forEach((thumbnail) => {
+      formData.append('thumbnailImages', thumbnail);
+    });
 
     setLoading(true);
     setMessage('');
@@ -120,12 +193,7 @@ const AdminUploadPage = () => {
           if (progress === 100) {
             setShowSuccess(true);
             setLoading(false);
-            setImage(null);
-            setConvertedImage(null);
-            setWebpPreviewUrl(null); // ✅ Clear preview
-            setName('');
-            setDescription('');
-            setCategory('');
+            resetForm();
             setTimeout(() => setShowSuccess(false), 2500);
           }
         },
@@ -133,13 +201,39 @@ const AdminUploadPage = () => {
     } catch (error) {
       setLoading(false);
       setUploadProgress(0);
-      setMessage('Error uploading the file. Please try again.');
+      setMessage('Error uploading the saree. Please try again.');
+      console.error(error);
     }
   };
 
+  // Reset form after successful upload
+  const resetForm = () => {
+    setMainImage(null);
+    setThumbnailImages([]);
+    setConvertedMainImage(null);
+    setConvertedThumbnailImages([]);
+    setMainWebpPreviewUrl(null);
+    
+    // Clean up object URLs to prevent memory leaks
+    thumbnailWebpPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    setThumbnailWebpPreviewUrls([]);
+    
+    setName('');
+    setDescription('');
+    setCategory('');
+  };
+
+  // Clean up object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (mainWebpPreviewUrl) URL.revokeObjectURL(mainWebpPreviewUrl);
+      thumbnailWebpPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [mainWebpPreviewUrl, thumbnailWebpPreviewUrls]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
-      {/* ✅ Success Overlay */}
+      {/* Success Overlay */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-2xl animate-bounce">
@@ -168,31 +262,87 @@ const AdminUploadPage = () => {
               <option value="Fancy">Fancy</option>
             </select>
 
-            {/* ✅ Drag & Drop File Upload */}
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              className={`mt-2 flex justify-center items-center px-6 pt-5 pb-6 border-2 ${
-                isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-              } border-dashed rounded-lg transition-all`}
-            >
-              <div className="space-y-1 text-center">
-                <p className="text-gray-600">Drag & drop an image or click below</p>
-                <input type="file" accept="image/*" onChange={handleFileChange} className="sr-only" id="file-upload" />
-                <label htmlFor="file-upload" className="cursor-pointer text-blue-600 font-medium">
-                  Choose Image
-                </label>
+            {/* Main Image Upload */}
+            <div className="space-y-2">
+              <p className="font-medium text-gray-700">Main Image (Required)</p>
+              <div
+                onDrop={handleMainDrop}
+                onDragOver={(e) => handleDragOver(e, setIsDraggingMain)}
+                onDragLeave={() => handleDragLeave(setIsDraggingMain)}
+                className={`flex justify-center items-center px-6 pt-5 pb-6 border-2 ${
+                  isDraggingMain ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                } border-dashed rounded-lg transition-all`}
+              >
+                <div className="space-y-1 text-center">
+                  <p className="text-gray-600">Drag & drop main image or click below</p>
+                  <input type="file" accept="image/*" onChange={handleMainFileChange} className="sr-only" id="main-file-upload" />
+                  <label htmlFor="main-file-upload" className="cursor-pointer text-blue-600 font-medium">
+                    Choose Main Image
+                  </label>
+                </div>
               </div>
+
+              {/* Main Image Preview */}
+              {mainWebpPreviewUrl && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Main Image Preview:</p>
+                  <img src={mainWebpPreviewUrl} alt="Main Image Preview" className="w-32 h-32 object-cover rounded-lg mx-auto shadow-md" />
+                </div>
+              )}
             </div>
 
-            {/* ✅ WebP Preview */}
-            {webpPreviewUrl && (
-              <div className="mt-4 text-center">
-                <p className="text-sm font-medium text-gray-600 mb-2">WebP Preview:</p>
-                <img src={webpPreviewUrl} alt="WebP Preview" className="w-32 h-32 object-cover rounded-lg mx-auto shadow-md" />
+            {/* Thumbnail Images Upload */}
+            <div className="space-y-2">
+              <p className="font-medium text-gray-700">Additional Images (Optional, max 5)</p>
+              <div
+                onDrop={handleThumbnailsDrop}
+                onDragOver={(e) => handleDragOver(e, setIsDraggingThumbnails)}
+                onDragLeave={() => handleDragLeave(setIsDraggingThumbnails)}
+                className={`flex justify-center items-center px-6 pt-5 pb-6 border-2 ${
+                  isDraggingThumbnails ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                } border-dashed rounded-lg transition-all`}
+              >
+                <div className="space-y-1 text-center">
+                  <p className="text-gray-600">Drag & drop additional images or click below</p>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleThumbnailFilesChange} 
+                    className="sr-only" 
+                    id="thumbnail-files-upload" 
+                    multiple 
+                    disabled={thumbnailImages.length >= 5}
+                  />
+                  <label 
+                    htmlFor="thumbnail-files-upload" 
+                    className={`cursor-pointer ${thumbnailImages.length >= 5 ? 'text-gray-400' : 'text-blue-600'} font-medium`}
+                  >
+                    {thumbnailImages.length >= 5 ? 'Maximum 5 images reached' : 'Choose Additional Images'}
+                  </label>
+                </div>
               </div>
-            )}
+
+              {/* Thumbnail Images Preview */}
+              {thumbnailWebpPreviewUrls.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Additional Images Preview:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {thumbnailWebpPreviewUrls.map((url, index) => (
+                      <div key={index} className="relative">
+                        <img src={url} alt={`Thumbnail ${index + 1}`} className="w-20 h-20 object-cover rounded-lg shadow-md" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveThumbnail(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {uploadProgress > 0 && (
               <div className="w-full bg-gray-200 rounded-full h-4 mt-4">

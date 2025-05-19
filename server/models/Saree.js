@@ -1,3 +1,4 @@
+// models/Saree.js
 const mongoose = require('mongoose');
 
 const sareeSchema = new mongoose.Schema({
@@ -13,6 +14,10 @@ const sareeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    thumbnailImages: [{
+        type: String,
+        required: false,
+    }],
     category: {
         type: String,
         required: true,
