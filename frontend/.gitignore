@@ -12,6 +12,7 @@ node_modules
 env
 
 *.local
+reviews.json
 
 # Editor directories and files
 .vscode/*
