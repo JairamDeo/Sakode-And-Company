@@ -40,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded file
 
 // Routes
 app.use('/api/sarees', require("./routes/sarees"));
+app.use('/api/reviews', require("./routes/reviews"));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
